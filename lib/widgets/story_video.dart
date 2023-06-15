@@ -86,18 +86,20 @@ class StoryVideoState extends State<StoryVideo> {
     // });
   }
 
+  void vpListener() {
+    if (widget.storyController!.durations[widget.videoLoader.url] == null) {
+      widget.storyController!.setDuration(
+          widget.videoLoader.url, videoPlayerController!.value.duration);
+    }
+    if (videoPlayerController!.value.isBuffering) {
+      widget.storyController!.setBuffering(true);
+    } else {
+      widget.storyController!.setBuffering(false);
+    }
+  }
+
   void videoInitialized() {
-    videoPlayerController!.addListener(() {
-      if (widget.storyController!.durations[widget.videoLoader.url] == null) {
-        widget.storyController!.setDuration(
-            widget.videoLoader.url, videoPlayerController!.value.duration);
-      }
-      if (videoPlayerController!.value.isBuffering) {
-        widget.storyController!.setBuffering(true);
-      } else {
-        widget.storyController!.setBuffering(false);
-      }
-    });
+    videoPlayerController!.addListener(vpListener);
     if (widget.storyController != null) {
       _streamSubscription =
           widget.storyController!.playbackNotifier.listen((playbackState) {
@@ -160,6 +162,7 @@ class StoryVideoState extends State<StoryVideo> {
     Future.delayed(Duration(minutes: 1)).then((value) {
       videoPlayerController?.dispose();
     });
+    videoPlayerController?.removeListener(vpListener);
     _streamSubscription?.cancel();
     super.dispose();
   }
