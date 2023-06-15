@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cached_video_player/cached_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:video_player/video_player.dart';
 
-import '../utils.dart';
 import '../controller/story_controller.dart';
+import '../utils.dart';
 
 class VideoLoader {
   String url;
@@ -25,8 +25,8 @@ class VideoLoader {
       onComplete();
     }
 
-    final fileStream = DefaultCacheManager()
-        .getFileStream(this.url, headers: this.requestHeaders as Map<String, String>?);
+    final fileStream = DefaultCacheManager().getFileStream(this.url,
+        headers: this.requestHeaders as Map<String, String>?);
 
     fileStream.listen((fileResponse) {
       if (fileResponse is FileInfo) {
@@ -69,38 +69,38 @@ class StoryVideoState extends State<StoryVideo> {
 
   StreamSubscription? _streamSubscription;
 
-  VideoPlayerController? playerController;
+  CachedVideoPlayerController? playerController;
 
   @override
   void initState() {
     super.initState();
 
     widget.storyController!.pause();
+    widget.videoLoader.state = LoadState.success;
+    // widget.videoLoader.loadVideo(() {
+    if (widget.videoLoader.state == LoadState.success) {
+      this.playerController =
+          CachedVideoPlayerController.network(widget.videoLoader.url);
 
-    widget.videoLoader.loadVideo(() {
-      if (widget.videoLoader.state == LoadState.success) {
-        this.playerController =
-            VideoPlayerController.file(widget.videoLoader.videoFile!);
-
-        playerController!.initialize().then((v) {
-          setState(() {});
-          widget.storyController!.play();
-        });
-
-        if (widget.storyController != null) {
-          _streamSubscription =
-              widget.storyController!.playbackNotifier.listen((playbackState) {
-            if (playbackState == PlaybackState.pause) {
-              playerController!.pause();
-            } else {
-              playerController!.play();
-            }
-          });
-        }
-      } else {
+      playerController!.initialize().then((v) {
         setState(() {});
+        widget.storyController!.play();
+      });
+
+      if (widget.storyController != null) {
+        _streamSubscription =
+            widget.storyController!.playbackNotifier.listen((playbackState) {
+          if (playbackState == PlaybackState.pause) {
+            playerController!.pause();
+          } else {
+            playerController!.play();
+          }
+        });
       }
-    });
+    } else {
+      setState(() {});
+    }
+    // });
   }
 
   Widget getContentView() {
@@ -109,7 +109,7 @@ class StoryVideoState extends State<StoryVideo> {
       return Center(
         child: AspectRatio(
           aspectRatio: playerController!.value.aspectRatio,
-          child: VideoPlayer(playerController!),
+          child: CachedVideoPlayer(playerController!),
         ),
       );
     }
