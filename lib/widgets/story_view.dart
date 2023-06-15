@@ -481,7 +481,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
         widget.controller.bufferingNotifier.listen((buffering) {
       if (buffering && _animationController!.isAnimating) {
         _animationController!.stop(canceled: false);
-      } else if (!buffering && _animationController!.isAnimating) {
+      } else if (!buffering && !_animationController!.isAnimating) {
         _animationController!.forward(from: _animationController!.value);
       }
     });
