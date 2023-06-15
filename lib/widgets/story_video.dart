@@ -87,21 +87,31 @@ class StoryVideoState extends State<StoryVideo> {
   }
 
   void videoInitialized() {
+    videoPlayerController!.addListener(() {
+      if (videoPlayerController!.value.position.inMilliseconds ==
+          videoPlayerController!.value.duration.inMilliseconds) {
+        if (videoPlayerController!.value.isBuffering) {
+          print("buffering");
+        }
+        if (videoPlayerController!.value.isPlaying) {
+          print("playing");
+        }
+      }
+    });
     if (widget.storyController != null) {
       _streamSubscription =
-          widget.storyController!.playbackNotifier2.listen((bool isPlay) async {
-        if (!isPlay) {
+          widget.storyController!.playbackNotifier.listen((playbackState) {
+        if (playbackState == PlaybackState.pause) {
           videoPlayerController!.pause();
         } else {
-          await videoPlayerController!.play();
-          widget.storyController!.play();
+          videoPlayerController!.play();
         }
       });
     }
-    widget.storyController!.playVideo();
     setState(() {
       widget.videoLoader.state = LoadState.success;
     });
+    widget.storyController!.play();
   }
 
   Widget getContentView() {

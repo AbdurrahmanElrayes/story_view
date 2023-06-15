@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
@@ -432,6 +431,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   Timer? _nextDebouncer;
 
   StreamSubscription<PlaybackState>? _playbackSubscription;
+  StreamSubscription<Duration>? _videoDurationSubscription;
 
   VerticalDragInfo? verticalDragInfo;
 
@@ -462,6 +462,17 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
         it!.shown = false;
       });
     }
+
+    this._videoDurationSubscription =
+        widget.controller.videoDurationNotifier.listen((duration) {
+      _animationController!.duration =
+          (duration.compareTo(_animationController!.duration!).isNegative
+              ? _animationController!.duration
+              : duration);
+      if (_animationController!.isAnimating) {
+        _animationController!.forward(from: _animationController!.value);
+      }
+    });
 
     this._playbackSubscription =
         widget.controller.playbackNotifier.listen((playbackStatus) {
@@ -497,6 +508,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
     _animationController?.dispose();
     _playbackSubscription?.cancel();
+    _videoDurationSubscription?.cancel();
 
     super.dispose();
   }
