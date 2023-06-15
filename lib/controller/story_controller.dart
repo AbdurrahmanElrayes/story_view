@@ -12,8 +12,10 @@ class StoryController {
   final playbackNotifier = BehaviorSubject<PlaybackState>();
   final videoDurationNotifier = BehaviorSubject<Duration>();
   final playbackNotifier2 = BehaviorSubject<bool>();
+  final Map<String, Duration> durations = {};
 
-  setDuration(Duration duration) {
+  setDuration(String videoUrl, Duration duration) {
+    durations[videoUrl] = duration;
     videoDurationNotifier.add(duration);
   }
 

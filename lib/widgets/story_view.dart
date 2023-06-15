@@ -260,7 +260,9 @@ class StoryItem {
           ),
         ),
         shown: shown,
-        duration: duration ?? Duration(seconds: 10));
+        duration: controller.durations[url] != null
+            ? controller.durations[url]!
+            : (duration ?? Duration(seconds: 10)));
   }
 
   /// Shorthand for creating a story item from an image provider such as `AssetImage`
@@ -530,7 +532,6 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     if (widget.onStoryShow != null) {
       widget.onStoryShow!(storyItem);
     }
-
     _animationController =
         AnimationController(duration: storyItem.duration, vsync: this);
 

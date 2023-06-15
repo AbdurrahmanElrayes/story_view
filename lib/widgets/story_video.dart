@@ -88,13 +88,21 @@ class StoryVideoState extends State<StoryVideo> {
 
   void videoInitialized() {
     videoPlayerController!.addListener(() {
+      if (widget.storyController!.durations[widget.videoLoader.url] == null) {
+        widget.storyController!.setDuration(
+            widget.videoLoader.url, videoPlayerController!.value.duration);
+      }
       if (videoPlayerController!.value.position.inMilliseconds ==
           videoPlayerController!.value.duration.inMilliseconds) {
         if (videoPlayerController!.value.isBuffering) {
           print("buffering");
+        } else {
+          print("not buffering");
         }
         if (videoPlayerController!.value.isPlaying) {
           print("playing");
+        } else {
+          print("not playing");
         }
       }
     });
