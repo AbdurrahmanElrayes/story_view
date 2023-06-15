@@ -93,14 +93,9 @@ class StoryVideoState extends State<StoryVideo> {
             widget.videoLoader.url, videoPlayerController!.value.duration);
       }
       if (videoPlayerController!.value.isBuffering) {
-        print("buffering");
+        widget.storyController!.setBuffering(true);
       } else {
-        print("not buffering");
-      }
-      if (videoPlayerController!.value.isPlaying) {
-        print("playing");
-      } else {
-        print("not playing");
+        widget.storyController!.setBuffering(false);
       }
     });
     if (widget.storyController != null) {
@@ -162,7 +157,9 @@ class StoryVideoState extends State<StoryVideo> {
 
   @override
   void dispose() {
-    videoPlayerController?.dispose();
+    Future.delayed(Duration(minutes: 1)).then((value) {
+      videoPlayerController?.dispose();
+    });
     _streamSubscription?.cancel();
     super.dispose();
   }
