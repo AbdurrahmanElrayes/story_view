@@ -11,7 +11,7 @@ class StoryController {
   /// Stream that broadcasts the playback state of the stories.
   final playbackNotifier = BehaviorSubject<PlaybackState>();
   final videoDurationNotifier = BehaviorSubject<Duration>();
-  final playbackNotifier2 = BehaviorSubject<bool>();
+  final bufferingNotifier = BehaviorSubject<bool>();
   final Map<String, Duration> durations = {};
 
   setDuration(String videoUrl, Duration duration) {
@@ -29,8 +29,8 @@ class StoryController {
     playbackNotifier.add(PlaybackState.play);
   }
 
-  void playVideo() {
-    playbackNotifier2.add(true);
+  void setBuffering(bool buffering) {
+    bufferingNotifier.add(buffering);
   }
 
   void next() {
@@ -45,7 +45,7 @@ class StoryController {
   /// the notifier stream.
   void dispose() {
     playbackNotifier.close();
-    playbackNotifier2.close();
+    bufferingNotifier.close();
     videoDurationNotifier.close();
   }
 }

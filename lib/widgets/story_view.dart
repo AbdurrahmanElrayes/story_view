@@ -433,6 +433,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   Timer? _nextDebouncer;
 
   StreamSubscription<PlaybackState>? _playbackSubscription;
+  StreamSubscription<bool>? _bufferingSubscription;
   StreamSubscription<Duration>? _videoDurationSubscription;
 
   VerticalDragInfo? verticalDragInfo;
@@ -476,6 +477,14 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
       }
     });
 
+    this._bufferingSubscription =
+        widget.controller.bufferingNotifier.listen((buffering) {
+      if (buffering && _animationController!.isAnimating) {
+        _animationController!.stop(canceled: false);
+      } else if (!buffering && _animationController!.isAnimating) {
+        _animationController!.forward(from: _animationController!.value);
+      }
+    });
     this._playbackSubscription =
         widget.controller.playbackNotifier.listen((playbackStatus) {
       switch (playbackStatus) {
@@ -510,6 +519,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
     _animationController?.dispose();
     _playbackSubscription?.cancel();
+    _bufferingSubscription?.cancel();
     _videoDurationSubscription?.cancel();
 
     super.dispose();
