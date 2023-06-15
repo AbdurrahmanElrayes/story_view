@@ -69,47 +69,47 @@ class StoryVideoState extends State<StoryVideo> {
 
   StreamSubscription? _streamSubscription;
 
-  CachedVideoPlayerController? playerController;
+  CachedVideoPlayerController? videoPlayerController;
 
   @override
   void initState() {
     super.initState();
 
     widget.storyController!.pause();
-    widget.videoLoader.state = LoadState.success;
+    this.videoPlayerController =
+        CachedVideoPlayerController.network(widget.videoLoader.url);
+
+    videoPlayerController!.initialize().then((v) {
+      videoInitialized();
+    });
     // widget.videoLoader.loadVideo(() {
-    if (widget.videoLoader.state == LoadState.success) {
-      this.playerController =
-          CachedVideoPlayerController.network(widget.videoLoader.url);
-
-      playerController!.initialize().then((v) {
-        setState(() {});
-        widget.storyController!.play();
-      });
-
-      if (widget.storyController != null) {
-        _streamSubscription =
-            widget.storyController!.playbackNotifier.listen((playbackState) {
-          if (playbackState == PlaybackState.pause) {
-            playerController!.pause();
-          } else {
-            playerController!.play();
-          }
-        });
-      }
-    } else {
-      setState(() {});
-    }
     // });
+  }
+
+  void videoInitialized() {
+    setState(() {
+      widget.videoLoader.state = LoadState.success;
+    });
+    widget.storyController!.play();
+    if (widget.storyController != null) {
+      _streamSubscription =
+          widget.storyController!.playbackNotifier.listen((playbackState) {
+        if (playbackState == PlaybackState.pause) {
+          videoPlayerController!.pause();
+        } else {
+          videoPlayerController!.play();
+        }
+      });
+    }
   }
 
   Widget getContentView() {
     if (widget.videoLoader.state == LoadState.success &&
-        playerController!.value.isInitialized) {
+        videoPlayerController!.value.isInitialized) {
       return Center(
         child: AspectRatio(
-          aspectRatio: playerController!.value.aspectRatio,
-          child: CachedVideoPlayer(playerController!),
+          aspectRatio: videoPlayerController!.value.aspectRatio,
+          child: CachedVideoPlayer(videoPlayerController!),
         ),
       );
     }
@@ -146,7 +146,7 @@ class StoryVideoState extends State<StoryVideo> {
 
   @override
   void dispose() {
-    playerController?.dispose();
+    videoPlayerController?.dispose();
     _streamSubscription?.cancel();
     super.dispose();
   }
